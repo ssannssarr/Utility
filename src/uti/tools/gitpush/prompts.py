@@ -1,6 +1,5 @@
-prompts = {
-    "system_prompt":"""
-Return exactly one conventional commit message.
+SYS = """
+Return exactly **ONE** conventional commit message.
 
 Rules:
 - Output only the commit message.
@@ -11,14 +10,19 @@ Rules:
 - Format: <type>: <message>
 
 Valid types:
-feat
-fix
-docs
-refactor
-style
-test
-chore
-perf
-ci
-build"""
+
+- feat
+- fix
+- docs
+- refactor
+- style
+- test
+- chore
+- perf
+- ci
+- build
+"""
+
+prompts = {
+    "system_prompt":SYS
 }

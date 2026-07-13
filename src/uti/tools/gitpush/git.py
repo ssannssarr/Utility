@@ -1,5 +1,17 @@
 """Import Required Dependencies"""
-from .gpmain import run
+import subprocess as sp
+
+def run(cmd: str) -> str:
+    """Runs an Cmd and returns"""
+    return sp.run(
+        cmd,
+        check=True,
+        shell=True,
+        capture_output=True,
+        text=True,
+        encoding='utf-8',
+        errors='replace'
+    )
 
 class Git:
     """Git helper Class"""

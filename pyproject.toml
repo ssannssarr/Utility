@@ -1,0 +1,17 @@
+[project]
+name = "utility"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "click>=8.4.2",
+    "requests>=2.34.2",
+    "rich>=15.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pylint>=4.0.6",
+    "ruff>=0.15.21",
+]

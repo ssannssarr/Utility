@@ -1,10 +1,10 @@
 """Import Required dependencies"""
-from .git import Git,GitError
-from .api import OpenAI
-import sys
 from contextlib import contextmanager
+import sys
 from dataclasses import dataclass
 from rich.console import Console
+from .git import Git,GitError
+from .api import OpenAI
 
 ai = OpenAI()
 git = Git()
@@ -55,17 +55,17 @@ def confirmation(que: str) -> bool:
         confirmation('Enter your choice!')
 
     Returns:
-        bool: True if y or yes and Fasle if n or no 
+        bool: True if y or yes and Fasle if n or no
     """
     while True:
         console.print(f'[yellow]{que}[/]')
-        confirmation = input(': ').lower().strip()
-        if not ('y','n','yes','no') in confirmation:
+        confirm = input(': ').lower().strip()
+        if ('y','n','yes','no') not in confirm:
             continue
-        
-        if not confirmation == 'y' or confirmation =='yes':
+
+        if confirm != 'y' or confirm !='yes':
             return False
-        
+
         return True
 
 @contextmanager
@@ -75,12 +75,12 @@ def status(msg: str):
     Args:
         msg:
             str: The status messasge that has to be rendered
-    
+
     Usage:
         with status("Getting diff.."):
             #your code block here
             pass
-    
+
     Yeilds:
         rich.status: {arc} Your message!
     """
@@ -91,13 +91,25 @@ def status(msg: str):
     ):
         yield
 
-def commit_msg() -> tuple:
+def commit_msg() -> str:
+    """
+    *Takes custom commit msg if User didnt liked the msg given by llm*
+
+    Args:
+        None
+
+    Usage:
+        msg = commit_msg()
+
+    Returns:
+        str: The commit msg written by the User
+    """
     console.print("[yellow]Wnter Commit msg;")
     while True:
         msg = input(': ')
         if not msg:
             continue
-        
+
         return msg
 
 def get_remote_branch():
@@ -106,10 +118,10 @@ def get_remote_branch():
 
     Args:
         None
-    
+
     Usage:
         remote, branch = get_remote_barnch()
-    
+
     Returns:
         tuple: (remote,branch)
     """
@@ -119,26 +131,36 @@ def get_remote_branch():
         remote = input(": ")
         if not remote:
             continue
-    
+
     console.print("[yellow]Enter Branch name...[/]")
     while True:
         branch = input(": ")
         if not branch:
             continue
-    
+
     return remote, branch
 
 @dataclass(frozen=True)
 class Workflow:
+    """Confirmation Config Class for push workflow"""
     branch_confirm: bool
     files_cofimrm: bool
     commit_confirm: bool
     remote_branch_confirm: bool
 
 def push(config: Workflow):
+    """
+    *This the main code block that does add, commit and push*
+
+    Args:
+        config: Worflow
+
+    Usage:
+        Well you can use this so many ways but I am gonna use it in cli using click module
+    """
     if not git.is_repo:
         raise GitError("Not inside Repo!")
-    
+
     try:
         branch =  git.branch()
         console.print(f"[#ffebcd]Pushing on brach[/] [cyan]{branch.stdout}[/]")
@@ -148,7 +170,7 @@ def push(config: Workflow):
             if not branch_conf:
                 console.print("[#ffebcd]Switch To Your Preffered Branch;[/]")
                 sys.exit()
-        
+
         if config.files_cofimrm:
             files = input("Files or  Options to git add cmd: ")
         else:
@@ -161,7 +183,7 @@ def push(config: Workflow):
             if not raw_diff:
                 console.print("[yellow]No Changes No Commit.[/]")
                 sys.exit()
-        
+
         with status("Getting Commit msg from llm..."):
             prompt = build_prompt(diff_stat=diff_stat,raw_diff=raw_diff)
             msg, model = ai.ask(prompt=prompt)
@@ -171,10 +193,10 @@ def push(config: Workflow):
             commit_conf = confirmation(que="Will You use this msg? y/n ")
             if not commit_conf:
                 msg = commit_msg()
-        
+
         with status("Commiting The Changes..."):
             console.print(git.commit(msg=msg).stdout)
-        
+
         if config.remote_branch_confirm:
             remote, branch = get_remote_branch()
         else:

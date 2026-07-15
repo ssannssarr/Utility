@@ -3,8 +3,8 @@ import subprocess as sp
 from subprocess import CompletedProcess,CalledProcessError
 from functools import wraps
 
-def run(cmd: str) -> str:
-    """Runs an Cmd and returns"""
+def execute(cmd: str) -> CompletedProcess :
+    """execute's an Cmd and returns"""
     return sp.run(
         cmd,
         check=True,
@@ -37,7 +37,7 @@ def git_error(msg: str | None = None):
 
 
 class Git:
-    """Git helper Class"""    
+    """Git helper Class"""
     @git_error("Failed to add files")
     def add(self,files: str) -> CompletedProcess :
         """
@@ -53,7 +53,7 @@ class Git:
         Returns:
             object: Complete Process
         """
-        return run(f"git add {files}")
+        return execute(f"git add {files}")
 
     @git_error("Failed to commit")
     def commit(self,msg: str) -> CompletedProcess :
@@ -70,9 +70,9 @@ class Git:
         Returns:
             object: Complete process
         """
-        return  run(f"git commit -m {msg}")
+        return  execute(f'git commit -m "{msg}"')
 
-    @git_error("Failed to run diff")
+    @git_error("Failed to execute diff")
     def diff(self,options: str = None) -> CompletedProcess :
         """
         *Diff Checker*
@@ -87,10 +87,10 @@ class Git:
         Returns:
             object: Complete process
         """
-        return run(f"git diff {options}")
+        return execute(f"git diff {options}")
 
     @git_error("Failed to push")
-    def push(self,remote: str = None,branch: str = None) -> CompletedProcess :
+    def push(self,remote: str |None = None,branch: str |None = None) -> CompletedProcess :
         """
         *As the name it pushes commited codes to remote repo*
 
@@ -106,7 +106,13 @@ class Git:
         Returns:
             object: Complete Process
         """
-        return run(f"git push {remote} {branch}")
+        if remote is None and branch is None:
+            return execute("git push")
+        
+        if remote is None or branch is None:
+            raise GitError("Provide Both (remote & branch) or dont provide any for default remote.branch")
+            
+        return execute(f"git push {remote} {branch}")
 
     def is_repo(self) -> bool :
         """
@@ -122,7 +128,7 @@ class Git:
             bool: True or False
         """
         try:
-            res = run("git rev-parse --is-inside-work-tree")
+            res = execute("git rev-parse --is-inside-work-tree")
             return bool(res.stdout)
         except CalledProcessError:
             return False
@@ -132,11 +138,11 @@ class Git:
         """
         *Checkes for current branch*
         Args:
-            None 
+            None
         Usage:
             Git.branch()
         Returns:
             object: Complete Process
 
         """
-        return run("git branch --show-current")
+        return execute("git branch --show-current")

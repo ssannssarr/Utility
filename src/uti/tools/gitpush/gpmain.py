@@ -1,8 +1,12 @@
 """Import Required dependencies"""
-from .git import Git
+from .git import Git,GitError
+from .api import OpenAI
+import sys
+from contextlib import contextmanager
+from dataclasses import dataclass
 from rich.console import Console
 
-
+ai = OpenAI()
 git = Git()
 console = Console()
 
@@ -40,7 +44,148 @@ def build_prompt(diff_stat: str, raw_diff: str) -> str:
     {raw_diff[:4000]}
     """
 
-def push():
-    git.is_repo()
+def confirmation(que: str) -> bool:
+    """
+    *It Prompts A comfirmation input*
 
+    Args:
+        que:
+            str: The question
+    Usage:
+        confirmation('Enter your choice!')
+
+    Returns:
+        bool: True if y or yes and Fasle if n or no 
+    """
+    while True:
+        console.print(f'[yellow]{que}[/]')
+        confirmation = input(': ').lower().strip()
+        if not ('y','n','yes','no') in confirmation:
+            continue
+        
+        if not confirmation == 'y' or confirmation =='yes':
+            return False
+        
+        return True
+
+@contextmanager
+def status(msg: str):
+    """
+    *For const theme status renderer*
+    Args:
+        msg:
+            str: The status messasge that has to be rendered
     
+    Usage:
+        with status("Getting diff.."):
+            #your code block here
+            pass
+    
+    Yeilds:
+        rich.status: {arc} Your message!
+    """
+    with console.status(
+        f"[#ffebcd]{msg}[/]",
+        spinner="arc",
+        spinner_style="#00ffff"
+    ):
+        yield
+
+def commit_msg() -> tuple:
+    console.print("[yellow]Wnter Commit msg;")
+    while True:
+        msg = input(': ')
+        if not msg:
+            continue
+        
+        return msg
+
+def get_remote_branch():
+    """
+    *Get remote and Branch name*
+
+    Args:
+        None
+    
+    Usage:
+        remote, branch = get_remote_barnch()
+    
+    Returns:
+        tuple: (remote,branch)
+    """
+
+    console.print("[yellow]Enter remote name..[/]")
+    while True:
+        remote = input(": ")
+        if not remote:
+            continue
+    
+    console.print("[yellow]Enter Branch name...[/]")
+    while True:
+        branch = input(": ")
+        if not branch:
+            continue
+    
+    return remote, branch
+
+@dataclass(frozen=True)
+class Workflow:
+    branch_confirm: bool
+    files_cofimrm: bool
+    commit_confirm: bool
+    remote_branch_confirm: bool
+
+def push(config: Workflow):
+    if not git.is_repo:
+        raise GitError("Not inside Repo!")
+    
+    try:
+        branch =  git.branch()
+        console.print(f"[#ffebcd]Pushing on brach[/] [cyan]{branch.stdout}[/]")
+        if config.branch_confirm:
+            branch_conf = confirmation("Do you want to push into this branch ?? y/n")
+
+            if not branch_conf:
+                console.print("[#ffebcd]Switch To Your Preffered Branch;[/]")
+                sys.exit()
+        
+        if config.files_cofimrm:
+            files = input("Files or  Options to git add cmd: ")
+        else:
+            files = "-A"
+        console.print(git.add(files=files))
+
+        with status(msg="Getting Diff..."):
+            diff_stat = git.diff("--staged --stat")
+            raw_diff = git.diff("--staged -z")
+            if not raw_diff:
+                console.print("[yellow]No Changes No Commit.[/]")
+                sys.exit()
+        
+        with status("Getting Commit msg from llm..."):
+            prompt = build_prompt(diff_stat=diff_stat,raw_diff=raw_diff)
+            msg, model = ai.ask(prompt=prompt)
+
+        console.print(f'{model}:{msg}')
+        if config.commit_confirm:
+            commit_conf = confirmation(que="Will You use this msg? y/n ")
+            if not commit_conf:
+                msg = commit_msg()
+        
+        with status("Commiting The Changes..."):
+            console.print(git.commit(msg=msg).stdout)
+        
+        if config.remote_branch_confirm:
+            remote, branch = get_remote_branch()
+        else:
+            remote = None
+            branch = None
+
+        with status("Pushing The Changes to remote..."):
+            console.print(git.push(remote=remote,branch=branch))
+
+        console.print("[#00ffff]DONE![/]")
+    except GitError as e:
+        console.print(f"{type(e).__name__}:{str(e)}")
+    except KeyboardInterrupt:
+        console.print("[yellow]Aborted By user..[/]")

@@ -30,27 +30,9 @@ def to_ai(prompt,API_KEY = api): # The messages that will go to Cloud or local A
 		"messages":[
 			{
 				"role":"system",
-				"content":"""Return exactly one conventional commit message.
+				"content":Return exactly one conventional commit message.
 
-Rules:
-- Output only the commit message.
-- No quotes.
-- No markdown.
-- No explanation.
-- Max 72 characters.
-- Format: <type>: <message>
-
-Valid types:
-feat
-fix
-docs
-refactor
-style
-test
-chore
-perf
-ci
-build"""
+ 
 			},
 			{
 				"role":"user",
@@ -88,7 +70,7 @@ def build_prompt(stat, raw_diff):
 
 	Diff:
 	{raw_diff[:4000]}
-	"""
+	"""		
 
 
 def is_repo():
@@ -119,7 +101,6 @@ def this_files():
 	if not f_check.lower() in ('yes','y'):
 		c.print("[yellow]Add in your Own[/]")
 		exit()
-
 
 def get_ai_message(prompt):
 	with c.status("Thinking...",spinner="dots",spinner_style="#AB82FF"):
@@ -212,7 +193,7 @@ def YOLO():
 		with c.status("Extracting Diff ...", spinner="dots",spinner_style="#AB82FF"):
 			stat = run(['git','diff','--cached','--stat']).stdout or ""
 			raw_diff  = run(['git','diff','--cached']).stdout or ""
-			if not raw_diff.strip():
+			if not raw_diff.strip():t
 				c.print("[yellow]No Changes To commit.[/]")
 				return 
 

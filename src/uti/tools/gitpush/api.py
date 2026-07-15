@@ -1,6 +1,8 @@
 """Import Required Dependencies"""
 from .config import config
 from .prompts import prompts
+import json
+import httpx
 
 class OpenAI:
     """OpenAI compatible API caller"""
@@ -8,7 +10,7 @@ class OpenAI:
     def __init__(self,
         api_key: str = config['api_key'],
         base_url: str = config['base_url'],
-        model:str=config['model']
+        model:str = config['model']
     ):
         self.api_key = api_key
         self.base_url = base_url
@@ -25,7 +27,7 @@ class OpenAI:
         payload={
             "model":self.model,
             "messages":[
-                {
+               {
                     "role":"system",
                     "content":prompts['system_prompt']
                 },
@@ -35,3 +37,15 @@ class OpenAI:
                 }
             ]
         }
+
+        res = httpx.post(
+            url,
+            headers=headers,
+            json=payload,
+            timeout=60
+        )
+
+        if res.status_code == 200:
+            return res.json()['choices'][0]['message']['content']
+
+        return json.dumps(res.json(),indent=4)

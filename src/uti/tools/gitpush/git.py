@@ -1,5 +1,7 @@
 """Import Required Dependencies"""
 import subprocess as sp
+from subprocess import CompletedProcess,CalledProcessError
+from functools import wraps
 
 def run(cmd: str) -> str:
     """Runs an Cmd and returns"""
@@ -13,9 +15,31 @@ def run(cmd: str) -> str:
         errors='replace'
     )
 
+class GitError(Exception):
+    """The GitError Class"""
+    def __init__(self, message: str):
+        """Custom Message"""
+        super().__init__(message)
+
+def git_error(msg: str | None = None):
+    """"""
+    def decorator(func):
+        """"""
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            """"""
+            try:
+                return func(*args, **kwargs)
+            except CalledProcessError as e:
+                raise GitError(f"{msg}\n{e.stderr}") from e
+        return wrapper
+    return decorator
+
+
 class Git:
-    """Git helper Class"""
-    def add(self,files: str):
+    """Git helper Class"""    
+    @git_error("Failed to add files")
+    def add(self,files: str) -> CompletedProcess :
         """
         *Adds passed files*
 
@@ -27,28 +51,29 @@ class Git:
             Git.add("-A")
 
         Returns:
-            None
+            object: Complete Process
         """
-        run(f"git add {files}")
+        return run(f"git add {files}")
 
-    def commit(self,msg: str) -> str:
+    @git_error("Failed to commit")
+    def commit(self,msg: str) -> CompletedProcess :
         """
         *Commits staged files*
-        
+
         Args:
-            msg: 
+            msg:
                 str: The Message for commit (or in simple 'commit message')
 
         Usage:
             Git.commit("Initail Commit")
 
         Returns:
-            str: The stdout and stderr that comes from running the command 
+            object: Complete process
         """
-        res =  run(f"git commit -m {msg}")
-        return res.stdout,res.stderr
+        return  run(f"git commit -m {msg}")
 
-    def diff(self,options: str = None) -> str:
+    @git_error("Failed to run diff")
+    def diff(self,options: str = None) -> CompletedProcess :
         """
         *Diff Checker*
 
@@ -60,17 +85,15 @@ class Git:
             Git.diff("--staged --stat")
 
         Returns:
-            str: The stdout and stderr that comes from running the command
-
-
+            object: Complete process
         """
-        res = run(f"git diff {options}")
-        return res.stdout, res.stderr
+        return run(f"git diff {options}")
 
-    def push(self,remote: str = None,branch: str = None):
+    @git_error("Failed to push")
+    def push(self,remote: str = None,branch: str = None) -> CompletedProcess :
         """
         *As the name it pushes commited codes to remote repo*
-        
+
         Args:
             remote:
                 str: The remote you want push. [Exp: origin]
@@ -81,14 +104,14 @@ class Git:
             Git.push(remote="origin",branch="main")
 
         Returns:
-            None
+            object: Complete Process
         """
-        run(f"git push {remote} {branch}")
+        return run(f"git push {remote} {branch}")
 
-    def is_repo(self):
+    def is_repo(self) -> bool :
         """
         *This checks either we are inside a git repo or not?*
-        
+
         Args:
             None
 
@@ -96,7 +119,24 @@ class Git:
             Git.is_repo()
 
         Returns:
-            str: The stdout and stderr that comes from running the command
+            bool: True or False
         """
-        res = run("git rev-parse --is-inside-work-tree")
-        return res.stdout,res.stderr
+        try:
+            res = run("git rev-parse --is-inside-work-tree")
+            return bool(res.stdout)
+        except CalledProcessError:
+            return False
+
+    @git_error
+    def branch(self) -> CompletedProcess:
+        """
+        *Checkes for current branch*
+        Args:
+            None 
+        Usage:
+            Git.branch()
+        Returns:
+            object: Complete Process
+
+        """
+        return run("git branch --show-current")

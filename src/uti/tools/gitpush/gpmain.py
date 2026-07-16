@@ -132,14 +132,14 @@ def get_remote_branch():
         if not remote:
             continue
         break
-    
+
     console.print("[yellow]Enter Branch name...[/]")
     while True:
         branch = input(": ")
         if not branch:
             continue
         break
-    
+
     return remote, branch
 
 @dataclass(frozen=True)
@@ -183,7 +183,8 @@ def push(config: Workflow):
         else:
             files = "-A"
         with status("Adding Files..."):
-            console.print(git.add(files=files).stdout)
+            add_out = git.add(files=files).stdout
+        console.print(add_out)
 
         with status(msg="Getting Diff..."):
             diff_stat = git.diff("--staged --stat").stdout
@@ -196,14 +197,15 @@ def push(config: Workflow):
             prompt = build_prompt(diff_stat=diff_stat,raw_diff=raw_diff)
             msg, model = ai.ask(prompt=prompt)
 
-        console.print(f'{model}:{msg}')
+        console.print(f'{model}: {msg}')
         if config.commit_confirm:
             commit_conf = confirmation(que="Will You use this msg? y/n ")
             if not commit_conf:
                 msg = commit_msg()
 
         with status("Commiting The Changes..."):
-            console.print(git.commit(msg=msg).stdout)
+            commit_out = git.commit(msg=msg).stdout
+        console.print(commit_out)
 
         if config.remote_branch_confirm:
             remote, branch = get_remote_branch()
@@ -212,7 +214,8 @@ def push(config: Workflow):
             branch = None
 
         with status("Pushing The Changes to remote..."):
-            console.print(git.push(remote=remote,branch=branch).stdout)
+            push_out = git.push(remote=remote,branch=branch).stdout
+        console.print(push_out)
 
         console.print("[#00ffff]DONE![/]")
     except GitError as e:

@@ -1,2 +1,6 @@
 """The GitPush module that does add, commit(with message by AI) and push """
-from . import *
+from .gpmain import (
+    push,
+    YOLO,
+    NORMAL
+)

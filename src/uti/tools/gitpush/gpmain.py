@@ -3,8 +3,8 @@ from contextlib import contextmanager
 import sys
 from dataclasses import dataclass
 from rich.console import Console
-from git import Git,GitError
-from api import OpenAI
+from .git import Git,GitError
+from .api import OpenAI
 
 ai = OpenAI()
 git = Git()
@@ -204,8 +204,7 @@ def push(config: Workflow):
                 msg = commit_msg()
 
         with status("Commiting The Changes..."):
-            commit_out = git.commit(msg=msg)
-        #console.print('out',repr(commit_out.stderr),'err',repr(commit_out.stdout))
+            git.commit(msg=msg)
 
         if config.remote_branch_confirm:
             remote, branch = get_remote_branch()
@@ -214,8 +213,8 @@ def push(config: Workflow):
             branch = None
 
         with status("Pushing The Changes to remote..."):
-            push_out = git.push(remote=remote,branch=branch)
-        #console.print('out',repr(push_out.stdout),'err',repr(push_out.stderr))
+            git.push(remote=remote,branch=branch)
+
 
         console.print("[#00ffff]DONE![/]")
     except GitError as e:
@@ -227,7 +226,7 @@ def push(config: Workflow):
     except Exception as e:
         console.print(git.reset().stdout)
         console.print(e)
-    
+
 
 if __name__ == "__main__":
     push(NORMAL)

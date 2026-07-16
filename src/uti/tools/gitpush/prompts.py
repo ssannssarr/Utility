@@ -1,3 +1,4 @@
+"""This File Contains All Prompts And Maps Them"""
 SYS = """
 Return exactly **ONE** conventional commit message.
 

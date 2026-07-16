@@ -166,7 +166,7 @@ def push(config: Workflow):
     Usage:
         Well you can use this so many ways but I am gonna use it in cli using click module
     """
-    if not git.is_repo:
+    if not git.is_repo():
         raise GitError("Not inside Repo!")
 
     try:
@@ -205,7 +205,7 @@ def push(config: Workflow):
 
         with status("Commiting The Changes..."):
             commit_out = git.commit(msg=msg)
-        console.print(commit_out.stderr,commit_out.stderr)
+        console.print('out',repr(commit_out.stderr),'err',repr(commit_out.stdout))
 
         if config.remote_branch_confirm:
             remote, branch = get_remote_branch()
@@ -214,8 +214,8 @@ def push(config: Workflow):
             branch = None
 
         with status("Pushing The Changes to remote..."):
-            push_out = git.push(remote=remote,branch=branch).stdout
-        console.print(push_out)
+            push_out = git.push(remote=remote,branch=branch)
+        console.print('out',repr(push_out.stdout),'err',repr(push_out.stderr))
 
         console.print("[#00ffff]DONE![/]")
     except GitError as e:

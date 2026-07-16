@@ -3,7 +3,8 @@ from config import config
 from prompts import prompts
 from typing import Any
 import json
-import httpx
+#import httpx
+import requests as rq
 
 class OpenAI:
     """OpenAI compatible API caller"""
@@ -39,11 +40,10 @@ class OpenAI:
             ]
         }
 
-        res = httpx.post(
+        res = rq.post(
             url,
             headers=headers,
             json=payload,
-            timeout=60
         )
 
         if res.status_code == 200:

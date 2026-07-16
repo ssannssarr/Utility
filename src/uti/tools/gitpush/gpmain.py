@@ -156,6 +156,14 @@ NORMAL = Workflow(
     commit_confirm=True,
     remote_branch_confirm=True
 )
+
+YOLO = Workflow(
+    branch_confirm=False,
+    ask_files=False,
+    commit_confirm=True,
+    remote_branch_confirm=False
+)
+
 def push(config: Workflow):
     """
     *This the main code block that does add, commit and push*
@@ -204,7 +212,7 @@ def push(config: Workflow):
                 msg = commit_msg()
 
         with status("Commiting The Changes..."):
-            git.commit(msg=msg)
+            commit = git.commit(msg=msg)
 
         if config.remote_branch_confirm:
             remote, branch = get_remote_branch()
@@ -213,7 +221,7 @@ def push(config: Workflow):
             branch = None
 
         with status("Pushing The Changes to remote..."):
-            git.push(remote=remote,branch=branch)
+            push = git.push(remote=remote,branch=branch)
 
 
         console.print("[#00ffff]DONE![/]")
@@ -229,4 +237,4 @@ def push(config: Workflow):
 
 
 if __name__ == "__main__":
-    push(NORMAL)
+    push(YOLO)

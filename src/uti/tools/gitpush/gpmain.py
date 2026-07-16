@@ -127,17 +127,19 @@ def get_remote_branch():
     """
 
     console.print("[yellow]Enter remote name..[/]")
-    while not remote:
+    while True:
         remote = input(": ")
         if not remote:
             continue
-
+        break
+    
     console.print("[yellow]Enter Branch name...[/]")
-    while not branch:
+    while True:
         branch = input(": ")
         if not branch:
             continue
-
+        break
+    
     return remote, branch
 
 @dataclass(frozen=True)

@@ -112,7 +112,7 @@ class Git:
         if remote is None or branch is None:
             raise GitError("Provide Both (remote & branch) or dont provide any for default remote.branch")
             
-        return execute(f"git push {remote} {branch}")
+        return execute(f"git push {remote} {branch}",capture_output=False)
 
     def is_repo(self) -> bool :
         """

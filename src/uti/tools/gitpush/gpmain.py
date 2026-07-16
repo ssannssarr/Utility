@@ -3,8 +3,8 @@ from contextlib import contextmanager
 import sys
 from dataclasses import dataclass
 from rich.console import Console
-from .git import Git,GitError
-from .api import OpenAI
+from git import Git,GitError
+from api import OpenAI
 
 ai = OpenAI()
 git = Git()
@@ -60,10 +60,10 @@ def confirmation(que: str) -> bool:
     while True:
         console.print(f'[yellow]{que}[/]')
         confirm = input(': ').lower().strip()
-        if ('y','n','yes','no') not in confirm:
+        if confirm not in {'y','n','yes','no'}:
             continue
 
-        if confirm != 'y' or confirm !='yes':
+        if confirm not in {'y','yes'}:
             return False
 
         return True
@@ -104,7 +104,7 @@ def commit_msg() -> str:
     Returns:
         str: The commit msg written by the User
     """
-    console.print("[yellow]Wnter Commit msg;")
+    console.print("[yellow]Enter Commit msg;")
     while True:
         msg = input(': ')
         if not msg:
@@ -127,13 +127,13 @@ def get_remote_branch():
     """
 
     console.print("[yellow]Enter remote name..[/]")
-    while True:
+    while not remote:
         remote = input(": ")
         if not remote:
             continue
 
     console.print("[yellow]Enter Branch name...[/]")
-    while True:
+    while not branch:
         branch = input(": ")
         if not branch:
             continue
@@ -144,10 +144,16 @@ def get_remote_branch():
 class Workflow:
     """Confirmation Config Class for push workflow"""
     branch_confirm: bool
-    files_cofimrm: bool
+    ask_files: bool
     commit_confirm: bool
     remote_branch_confirm: bool
 
+NORMAL = Workflow(
+    branch_confirm=True,
+    ask_files=True,
+    commit_confirm=True,
+    remote_branch_confirm=True
+)
 def push(config: Workflow):
     """
     *This the main code block that does add, commit and push*
@@ -162,8 +168,7 @@ def push(config: Workflow):
         raise GitError("Not inside Repo!")
 
     try:
-        branch =  git.branch()
-        console.print(f"[#ffebcd]Pushing on brach[/] [cyan]{branch.stdout}[/]")
+        console.print(f"[#ffebcd]Pushing on brach[/] [cyan]{git.branch().stdout}[/]")
         if config.branch_confirm:
             branch_conf = confirmation("Do you want to push into this branch ?? y/n")
 
@@ -171,15 +176,16 @@ def push(config: Workflow):
                 console.print("[#ffebcd]Switch To Your Preffered Branch;[/]")
                 sys.exit()
 
-        if config.files_cofimrm:
+        if config.ask_files:
             files = input("Files or  Options to git add cmd: ")
         else:
             files = "-A"
-        console.print(git.add(files=files))
+        with status("Adding Files..."):
+            console.print(git.add(files=files).stdout)
 
         with status(msg="Getting Diff..."):
-            diff_stat = git.diff("--staged --stat")
-            raw_diff = git.diff("--staged -z")
+            diff_stat = git.diff("--staged --stat").stdout
+            raw_diff = git.diff("--staged -z").stdout
             if not raw_diff:
                 console.print("[yellow]No Changes No Commit.[/]")
                 sys.exit()
@@ -204,10 +210,19 @@ def push(config: Workflow):
             branch = None
 
         with status("Pushing The Changes to remote..."):
-            console.print(git.push(remote=remote,branch=branch))
+            console.print(git.push(remote=remote,branch=branch).stdout)
 
         console.print("[#00ffff]DONE![/]")
     except GitError as e:
         console.print(f"{type(e).__name__}:{str(e)}")
+        console.print(git.reset().stdout)
     except KeyboardInterrupt:
         console.print("[yellow]Aborted By user..[/]")
+        console.print(git.reset().stdout)
+    except Exception as e:
+        console.print(git.reset().stdout)
+        console.print(e)
+    
+
+if __name__ == "__main__":
+    push(NORMAL)

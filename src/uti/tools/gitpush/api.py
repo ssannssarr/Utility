@@ -1,6 +1,6 @@
 """Import Required Dependencies"""
-from .config import config
-from .prompts import prompts
+from config import config
+from prompts import prompts
 from typing import Any
 import json
 import httpx
@@ -47,6 +47,6 @@ class OpenAI:
         )
 
         if res.status_code == 200:
-            return res.json()['choices'][0]['message']['content'], res.json()['model']
+            return res.json()['choices'][0]['message']['content'],  res.json()['model']
 
         return json.dumps(res.json(),indent=4)

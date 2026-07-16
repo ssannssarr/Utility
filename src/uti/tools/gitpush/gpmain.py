@@ -205,7 +205,7 @@ def push(config: Workflow):
 
         with status("Commiting The Changes..."):
             commit_out = git.commit(msg=msg)
-        console.print('out',repr(commit_out.stderr),'err',repr(commit_out.stdout))
+        #console.print('out',repr(commit_out.stderr),'err',repr(commit_out.stdout))
 
         if config.remote_branch_confirm:
             remote, branch = get_remote_branch()
@@ -215,7 +215,7 @@ def push(config: Workflow):
 
         with status("Pushing The Changes to remote..."):
             push_out = git.push(remote=remote,branch=branch)
-        console.print('out',repr(push_out.stdout),'err',repr(push_out.stderr))
+        #console.print('out',repr(push_out.stdout),'err',repr(push_out.stderr))
 
         console.print("[#00ffff]DONE![/]")
     except GitError as e:

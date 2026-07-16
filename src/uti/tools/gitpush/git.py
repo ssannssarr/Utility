@@ -3,13 +3,13 @@ import subprocess as sp
 from subprocess import CompletedProcess,CalledProcessError
 from functools import wraps
 
-def execute(cmd: str, shell: bool |None =True) -> CompletedProcess :
+def execute(cmd: str, shell: bool |None =True,capture_output:bool |None = True) -> CompletedProcess :
     """execute's an Cmd and returns"""
     return sp.run(
         cmd,
         check=True,
         shell=shell,
-        capture_output=True,
+        capture_output=capture_output,
         text=True,
         encoding='utf-8',
         errors='replace'
@@ -70,7 +70,7 @@ class Git:
         Returns:
             CompleteProcess: The Result after execution the command
         """
-        return  execute(['git','commit','-m',msg],shell=False)
+        return  execute(['git','commit','-m',msg],shell=False,capture_output=False)
 
     @git_error("Failed to execute diff")
     def diff(self,options: str = None) -> CompletedProcess :
@@ -107,7 +107,7 @@ class Git:
             CompleteProcess: The Result after execution the command
         """
         if remote is None and branch is None:
-            return execute("git push")
+            return execute("git push",capture_output=False)
         
         if remote is None or branch is None:
             raise GitError("Provide Both (remote & branch) or dont provide any for default remote.branch")

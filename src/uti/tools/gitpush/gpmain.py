@@ -87,7 +87,7 @@ def push(config: Workflow):
             branch = None
 
         with status("Pushing The Changes to remote..."):
-            push = git.push(remote=remote,branch=branch)
+            pushout = git.push(remote=remote,branch=branch)
 
 
         console.print("[#00ffff]DONE![/]")

@@ -3,7 +3,11 @@ import subprocess as sp
 from subprocess import CompletedProcess,CalledProcessError
 from functools import wraps
 
-def execute(cmd: str, shell: bool |None =True,capture_output:bool |None = True) -> CompletedProcess :
+def execute(
+    cmd: str,
+    shell: bool |None =True,
+    capture_output:bool |None = True
+) -> CompletedProcess:
     """execute's an Cmd and returns"""
     return sp.run(
         cmd,
@@ -22,12 +26,12 @@ class GitError(Exception):
         super().__init__(message)
 
 def git_error(msg: str | None = None):
-    """"""
+    """This Takes msg for git error"""
     def decorator(func):
-        """"""
+        """This is git error decorator"""
         @wraps(func)
         def wrapper(*args, **kwargs):
-            """"""
+            """This is func wrapper"""
             try:
                 return func(*args, **kwargs)
             except CalledProcessError as e:
@@ -108,10 +112,10 @@ class Git:
         """
         if remote is None and branch is None:
             return execute("git push",capture_output=False)
-        
+
         if remote is None or branch is None:
-            raise GitError("Provide Both (remote & branch) or dont provide any for default remote.branch")
-            
+            raise GitError("Provide Both (remote & branch) or dont provide any for default")
+
         return execute(f"git push {remote} {branch}",capture_output=False)
 
     def is_repo(self) -> bool :
@@ -146,7 +150,7 @@ class Git:
 
         """
         return execute("git branch --show-current")
-    
+
     @git_error("Failed to reset!")
     def reset(self) -> CompletedProcess:
         """

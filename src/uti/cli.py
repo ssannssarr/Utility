@@ -7,11 +7,12 @@ from .tools.gitpush import (
 )
 
 def main():
-    if sys.argv[1] in ('-y','--yolo'):
+    """Main Entry Point"""
+    if sys.argv[1] in ('-y',):
         config = YOLO
     else:
         config = NORMAL
-    
+
     push(config=config)
 
 if __name__ == '__main__':

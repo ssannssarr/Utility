@@ -3,12 +3,12 @@ import subprocess as sp
 from subprocess import CompletedProcess,CalledProcessError
 from functools import wraps
 
-def execute(cmd: str) -> CompletedProcess :
+def execute(cmd: str, shell: bool |None =True) -> CompletedProcess :
     """execute's an Cmd and returns"""
     return sp.run(
         cmd,
         check=True,
-        shell=True,
+        shell=shell,
         capture_output=True,
         text=True,
         encoding='utf-8',
@@ -70,7 +70,7 @@ class Git:
         Returns:
             CompleteProcess: The Result after execution the command
         """
-        return  execute(f'git commit -m "{msg}"')
+        return  execute(['git','commit','-m',msg],shell=False)
 
     @git_error("Failed to execute diff")
     def diff(self,options: str = None) -> CompletedProcess :

@@ -205,7 +205,7 @@ def push(config: Workflow):
 
         with status("Commiting The Changes..."):
             commit_out = git.commit(msg=msg)
-        console.print(commit_out.stderr,commit_out.stdout)
+        console.print(commit_out.stderr,commit_out.stderr)
 
         if config.remote_branch_confirm:
             remote, branch = get_remote_branch()

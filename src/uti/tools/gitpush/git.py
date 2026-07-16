@@ -51,7 +51,7 @@ class Git:
             Git.add("-A")
 
         Returns:
-            object: Complete Process
+            CompleteProcess: The Result after execution the command
         """
         return execute(f"git add {files}")
 
@@ -68,7 +68,7 @@ class Git:
             Git.commit("Initail Commit")
 
         Returns:
-            object: Complete process
+            CompleteProcess: The Result after execution the command
         """
         return  execute(f'git commit -m "{msg}"')
 
@@ -85,7 +85,7 @@ class Git:
             Git.diff("--staged --stat")
 
         Returns:
-            object: Complete process
+            CompleteProcess: The Result after execution the command
         """
         return execute(f"git diff {options}")
 
@@ -104,7 +104,7 @@ class Git:
             Git.push(remote="origin",branch="main")
 
         Returns:
-            object: Complete Process
+            CompleteProcess: The Result after execution the command
         """
         if remote is None and branch is None:
             return execute("git push")
@@ -133,7 +133,7 @@ class Git:
         except CalledProcessError:
             return False
 
-    @git_error
+    @git_error("Failed to Check Branach!")
     def branch(self) -> CompletedProcess:
         """
         *Checkes for current branch*
@@ -146,3 +146,17 @@ class Git:
 
         """
         return execute("git branch --show-current")
+    
+    @git_error("Failed to reset!")
+    def reset(self) -> CompletedProcess:
+        """
+        *This Method resets every thing after any error occurs*
+        Args:
+            None
+        Usage:
+            except Exception as e:
+                Git().reset()
+        Returns:
+            CompleteProcess: result after execution
+        """
+        return execute("git reset")

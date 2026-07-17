@@ -1,19 +1,24 @@
 """Import Required dependencies"""
 import sys
-from .tools.gitpush import (
-    push,
-    YOLO,
-    NORMAL
-)
+import click
+from .tools import gitpush as gp
+
+@click.group()
+def cli():
+    """Declare Entry Point Group"""
+
+@cli.command(help="It automates git add -> push workflow")
+@click.option('--yolo','-y',is_flag=True)
+def gpush(yolo):
+    if yolo:
+        config = gp.YOLO
+    else:
+        config = gp.NORMAL
+    gp.push(config=config)
 
 def main():
     """Main Entry Point"""
-    if sys.argv[1] in ('-y',):
-        config = YOLO
-    else:
-        config = NORMAL
-
-    push(config=config)
+    cli()
 
 if __name__ == '__main__':
     main()

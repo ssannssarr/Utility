@@ -78,7 +78,7 @@ def push(config: Workflow):
                 msg = commit_msg()
 
         with status("Commiting The Changes..."):
-            commit = git.commit(msg=msg)
+            commit = git.commit(msg=msg).stderr
 
         if config.remote_branch_confirm:
             remote, branch = get_remote_branch()
@@ -87,7 +87,7 @@ def push(config: Workflow):
             branch = None
 
         with status("Pushing The Changes to remote..."):
-            pushout = git.push(remote=remote,branch=branch)
+            pushout = git.push(remote=remote,branch=branch).stderr
 
 
         console.print("[#00ffff]DONE![/]")

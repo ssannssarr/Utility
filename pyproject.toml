@@ -10,7 +10,7 @@ dependencies = [
     "rich>=15.0.0",
 ]
 
-[dependency-groups]
+[optional.dependency-groups]
 dev = [
     "pylint>=4.0.6",
     "ruff>=0.15.21",
